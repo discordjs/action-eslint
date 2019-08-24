@@ -14,7 +14,7 @@
 		"sourceMap": false,
 		"inlineSourceMap": true,
 		"inlineSources": true,
-		"sourceRoot": "src",
+		"sourceRoot": "/",
 		"outDir": "dist",
 		"declaration": false,
 		"removeComments": false,
