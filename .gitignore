@@ -1,7 +1,3 @@
-# Packages
-node_modules/
-dist/
-
 # Log files
 logs/
 *.log
