@@ -79,12 +79,12 @@ async function run() {
 		});
 		currentSha = info.repository.pullRequest.commits.nodes[0].commit.oid;
 		const files = info.repository.pullRequest.files.nodes;
-		lintFiles = files.filter((file: { path: string }) => EXTENSIONS.has(extname(file.path))).map((f: { path: string }) => f.path);
+		lintFiles = files.filter((file: { path: string }) => EXTENSIONS.has(extname(file.path)) && !file.path.includes('.d.ts')).map((f: { path: string }) => f.path);
 	} else {
 		info = await octokit.repos.getCommit({ owner: context.repo.owner, repo: context.repo.repo, ref: GITHUB_SHA! });
 		currentSha = GITHUB_SHA!;
 		const files = info.data.files;
-		lintFiles = files.filter(file => EXTENSIONS.has(extname(file.filename))).map(f => f.filename);
+		lintFiles = files.filter(file => EXTENSIONS.has(extname(file.filename)) && !file.filename.includes('.d.ts')).map(f => f.filename);
 	}
 	debug(`Commit: ${currentSha}`);
 
