@@ -19,12 +19,14 @@ async function lint(files: string[] | null) {
 	const levels: ChecksUpdateParamsOutputAnnotations['annotation_level'][] = ['notice', 'warning', 'failure'];
 	const annotations: ChecksUpdateParamsOutputAnnotations[] = [];
 	const consoleOutput: string[] = [];
+	const consoleLevels = [, 'warning', 'error'];
 	for (const res of results) {
 		const { filePath, messages } = res;
 		const path = filePath.substring(GITHUB_WORKSPACE!.length + 1);
 		for (const msg of messages) {
 			const { line, endLine, column, endColumn, severity, ruleId, message } = msg;
 			const annotationLevel = levels[severity];
+			const consoleLevel = consoleLevels[severity];
 			annotations.push({
 				path,
 				start_line: line,
@@ -33,10 +35,10 @@ async function lint(files: string[] | null) {
 				end_column: endColumn || column,
 				annotation_level: annotationLevel,
 				title: ruleId || ACTION_NAME,
-				message: `${message}${ruleId ? `\n\nhttps://eslint.org/docs/rules/${ruleId}` : ''}`
+				message: `${message}${ruleId ? `\nhttps://eslint.org/docs/rules/${ruleId}` : ''}`
 			});
-			consoleOutput.push(path);
-			consoleOutput.push(`##[${severity}]  ${line}:${column}  ${severity}  ${message}  ${ruleId}\n\n`);
+			consoleOutput.push(`${path}\n`);
+			consoleOutput.push(`##[${consoleLevel}]  ${line}:${column}  ${consoleLevel}  ${message}  ${ruleId}\n\n`);
 		}
 	}
 	console.log(consoleOutput.join(''));
