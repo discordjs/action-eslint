@@ -18,6 +18,7 @@ async function lint(files: string[] | null) {
 	const { results, errorCount, warningCount } = report;
 	const levels: ChecksUpdateParamsOutputAnnotations['annotation_level'][] = ['notice', 'warning', 'failure'];
 	const annotations: ChecksUpdateParamsOutputAnnotations[] = [];
+	const consoleOutput: string[] = [];
 	for (const res of results) {
 		const { filePath, messages } = res;
 		const path = filePath.substring(GITHUB_WORKSPACE!.length + 1);
@@ -32,10 +33,13 @@ async function lint(files: string[] | null) {
 				end_column: endColumn || column,
 				annotation_level: annotationLevel,
 				title: ruleId || ACTION_NAME,
-				message
+				message: `${message}${ruleId ? `\n\nhttps://eslint.org/docs/rules/${ruleId}`: ''}`
 			});
+			consoleOutput.push(path);
+			consoleOutput.push(`##[${severity}]  ${line}:${column}  ${severity}  ${message}  ${ruleId}\n\n`);
 		}
 	}
+	console.log(consoleOutput.join(''));
 
 	return {
 		conclusion: errorCount > 0 ? 'failure' : 'success' as ChecksCreateParams['conclusion'],
