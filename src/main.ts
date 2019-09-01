@@ -33,7 +33,7 @@ async function lint(files: string[] | null) {
 				end_column: endColumn || column,
 				annotation_level: annotationLevel,
 				title: ruleId || ACTION_NAME,
-				message: `${message}${ruleId ? `\n\nhttps://eslint.org/docs/rules/${ruleId}`: ''}`
+				message: `${message}${ruleId ? `\n\nhttps://eslint.org/docs/rules/${ruleId}` : ''}`
 			});
 			consoleOutput.push(path);
 			consoleOutput.push(`##[${severity}]  ${line}:${column}  ${severity}  ${message}  ${ruleId}\n\n`);
