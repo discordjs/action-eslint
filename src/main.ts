@@ -118,7 +118,7 @@ async function run() {
 				ref: currentSha
 			});
 			const check = checks.data.check_runs.find(({ name }) => name.toLowerCase() === jobName.toLowerCase());
-			if (check) id = check.id;	
+			if (check) id = check.id;
 		} catch {
 			console.log('##[warning] Token doesn\'t have permission to access this resource.');
 		}
@@ -131,7 +131,7 @@ async function run() {
 				head_sha: currentSha,
 				status: 'in_progress',
 				started_at: new Date().toISOString()
-			})).data.id;	
+			})).data.id;
 		} catch (error) {
 			console.log('##[warning] Token doesn\'t have permission to access this resource.');
 		}
