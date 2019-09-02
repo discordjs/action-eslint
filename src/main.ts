@@ -111,43 +111,63 @@ async function run() {
 	let id: number | undefined;
 	const jobName = getInput('job-name');
 	if (jobName) {
-		const checks = await octokit.checks.listForRef({
-			...context.repo,
-			status: 'in_progress',
-			ref: currentSha
-		});
-		const check = checks.data.check_runs.find(({ name }) => name.toLowerCase() === jobName.toLowerCase());
-		if (check) id = check.id;
+		try {
+			const checks = await octokit.checks.listForRef({
+				...context.repo,
+				status: 'in_progress',
+				ref: currentSha
+			});
+			const check = checks.data.check_runs.find(({ name }) => name.toLowerCase() === jobName.toLowerCase());
+			if (check) id = check.id;	
+		} catch {
+			console.log('##[warning] Token doesn\'t have permission to access this resource.');
+		}
 	}
 	if (!id) {
-		id = (await octokit.checks.create({
-			...context.repo,
-			name: ACTION_NAME,
-			head_sha: currentSha,
-			status: 'in_progress',
-			started_at: new Date().toISOString()
-		})).data.id;
+		try {
+			id = (await octokit.checks.create({
+				...context.repo,
+				name: ACTION_NAME,
+				head_sha: currentSha,
+				status: 'in_progress',
+				started_at: new Date().toISOString()
+			})).data.id;	
+		} catch (error) {
+			console.log('##[warning] Token doesn\'t have permission to access this resource.');
+		}
 	}
 
 	try {
 		const lintAll = getInput('lint-all');
 		const { conclusion, output } = await lint(lintAll ? null : lintFiles);
-		await octokit.checks.update({
-			...context.repo,
-			check_run_id: id,
-			completed_at: new Date().toISOString(),
-			conclusion,
-			output
-		});
+		if (id) {
+			try {
+				await octokit.checks.update({
+					...context.repo,
+					check_run_id: id,
+					completed_at: new Date().toISOString(),
+					conclusion,
+					output
+				});
+			} catch {
+				console.log('##[warning] Token doesn\'t have permission to access this resource.');
+			}
+		}
 		debug(output.summary);
 		if (conclusion === 'failure') setFailed(output.summary);
 	} catch (error) {
-		await octokit.checks.update({
-			...context.repo,
-			check_run_id: id,
-			conclusion: 'failure',
-			completed_at: new Date().toISOString()
-		});
+		if (id) {
+			try {
+				await octokit.checks.update({
+					...context.repo,
+					check_run_id: id,
+					conclusion: 'failure',
+					completed_at: new Date().toISOString()
+				});
+			} catch {
+				console.log('##[warning] Token doesn\'t have permission to access this resource.');
+			}
+		}
 		setFailed(error.message);
 	}
 }
